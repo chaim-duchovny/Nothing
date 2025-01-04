@@ -97,6 +97,23 @@ class Boardgame:
         if self.piece_placed:
             self.piece_placed = False
 
+    def get_original_position_black(self, piece):
+        piece_positions = {
+            Bomb: (0, 10),
+            Marshal: (1, 10),
+            General: (2, 10),
+            Colonel: (3, 10),
+            Major: (0, 11),
+            Captain: (1, 11),
+            Lieutenant: (2, 11),
+            Sergeant: (3, 11),
+            Miner: (0, 12),
+            Scout: (1, 12),
+            Spy: (2, 12),
+            Flag: (3, 12)
+        }
+        return piece_positions.get(type(piece), None)
+
     def return_piece_black_selction(self, row, col):
         if 0 <= row <= 3 and 0 <= col <= 9:
             if self.squares[row][col].has_piece():
@@ -104,11 +121,13 @@ class Boardgame:
                 self.squares[row][col].piece = None
         
     def return_piece_black_return(self, row, col):
-        if self.piece_to_return_black is not None and self.piece_to_return_black.color == "black" and (0 <= row <= 3 and 10 <= col <= 12):
-            self.squares[row][col].piece = self.piece_to_return_black
-            self.squares[row][col].number += 1
-            self.piece_placed = False
-            self.piece_to_return_black = None
+        if self.piece_to_return_black is not None and self.piece_to_return_black.color == "black":
+            original_position = self.get_original_position_black(self.piece_to_return_black)
+            if (row, col) == original_position:
+                self.squares[row][col].piece = self.piece_to_return_black
+                self.squares[row][col].number += 1
+                self.piece_placed = False
+                self.piece_to_return_black = None
 
     def return_piece_red_selction(self, row, col):
         if 6 <= row <= 9 and 0 <= col <= 9:
