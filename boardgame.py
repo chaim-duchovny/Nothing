@@ -1,14 +1,15 @@
 from square import Square
 from piece import *
 from const import *
+import random
 
 class Boardgame:
 
     def __init__(self):
         self.squares = [[Square(row, col) for col in range(COLS)] for row in range(ROWS)]
-        self._create()
-        self._add_pieces_black("black")
-        self._add_pieces_red("red")
+        self.create()
+        self.add_pieces_black("black")
+        self.add_pieces_red("red")
         self.selected_piece = None
         self.selected_black_piece = None
         self.selected_red_piece = None
@@ -16,38 +17,58 @@ class Boardgame:
         self.piece_to_return_black = None
         self.piece_to_return_red = None
 
-    def _create(self):
+    def create(self):
         for row in range(ROWS):
             for col in range(COLS):
                 self.squares[row][col] = Square(row, col)
     
-    def _add_pieces_black(self, color):
-        self.squares[0][10] = Square(0, 0, 6, Bomb(color))
-        self.squares[1][10] = Square(1, 0, 1, Marshal(color))
-        self.squares[2][10] = Square(2, 0, 1, General(color))
-        self.squares[3][10] = Square(3, 0, 2, Colonel(color))
-        self.squares[0][11] = Square(0, 1, 3, Major(color))
-        self.squares[1][11] = Square(1, 1, 4, Captain(color))
-        self.squares[2][11] = Square(2, 1, 4, Lieutenant(color))
-        self.squares[3][11] = Square(3, 1, 4, Sergeant(color))
-        self.squares[0][12] = Square(0, 2, 5, Miner(color))
-        self.squares[1][12] = Square(1, 2, 8, Scout(color))
-        self.squares[2][12] = Square(2, 2, 1, Spy(color))
-        self.squares[3][12] = Square(3, 2, 1, Flag(color))
+    def add_pieces_black(self, color):
+        pieces = [
+            (6, Bomb), 
+            (1, Marshal), 
+            (1, General),
+            (2, Colonel), 
+            (3, Major), 
+            (4, Captain),
+            (4, Lieutenant), 
+            (4, Sergeant), 
+            (5, Miner),
+            (8, Scout), 
+            (1, Spy), 
+            (1, Flag)
+        ]
+    
+        available_squares = [(row, col) for row in range(4) for col in range(10, 13)]
+    
+        for count, piece_class in pieces:
+            if available_squares:
+                row, col = random.choice(available_squares)
+                self.squares[row][col] = Square(row, col, count, piece_class(color))
+                available_squares.remove((row, col))
 
-    def _add_pieces_red(self, color):
-        self.squares[6][10] = Square(0, 0, 6, Bomb(color))
-        self.squares[7][10] = Square(1, 0, 1, Marshal(color))
-        self.squares[8][10] = Square(2, 0, 1, General(color))
-        self.squares[9][10] = Square(3, 0, 2, Colonel(color))
-        self.squares[6][11] = Square(0, 1, 3, Major(color))
-        self.squares[7][11] = Square(1, 1, 4, Captain(color))
-        self.squares[8][11] = Square(2, 1, 4, Lieutenant(color))
-        self.squares[9][11] = Square(3, 1, 4, Sergeant(color))
-        self.squares[6][12] = Square(0, 2, 5, Miner(color))
-        self.squares[7][12] = Square(1, 2, 8, Scout(color))
-        self.squares[8][12] = Square(2, 2, 1, Spy(color))
-        self.squares[9][12] = Square(3, 2, 1, Flag(color))
+    def add_pieces_red(self, color):
+        pieces = [
+            (6, Bomb), 
+            (1, Marshal), 
+            (1, General),
+            (2, Colonel), 
+            (3, Major), 
+            (4, Captain),
+            (4, Lieutenant), 
+            (4, Sergeant), 
+            (5, Miner),
+            (8, Scout), 
+            (1, Spy), 
+            (1, Flag)
+        ]
+    
+        available_squares = [(row, col) for row in range(6, 10) for col in range(10, 13)]
+    
+        for count, piece_creator in pieces:
+            if available_squares:
+                row, col = random.choice(available_squares)
+                self.squares[row][col] = Square(row, col, count, piece_creator())
+                available_squares.remove((row, col))
         
     def handle_black_piece_selection(self, row, col):
         if not self.selected_black_piece and not self.piece_placed:
