@@ -211,7 +211,11 @@ class Boardgame:
             else:
                 end_square.piece = piece
                 start_square.piece = None
-
+            
+            win_result = self.check_win_condition()
+            if win_result:
+                return True, win_result
+        
             return True
         return False
 
