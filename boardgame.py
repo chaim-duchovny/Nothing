@@ -203,16 +203,15 @@ class Boardgame:
         if self.valid_move(startx, starty, endx, endy, piece):
             if end_square.has_piece():
                 if end_square.piece.color != piece.color:
-                    self.combat(piece, end_square.piece, startx, starty, endx, endy)
+                    combat_result = self.combat(piece, end_square.piece, startx, starty, endx, endy)
+                    if combat_result:
+                        return True, combat_result
                 else:
                     return False
             else:
                 end_square.piece = piece
                 start_square.piece = None
 
-            win_result = self.check_win_condition()
-            if win_result:
-                return True, win_result
             return True
         return False
 
@@ -223,21 +222,22 @@ class Boardgame:
         defender = self.squares[defendery][defenderx].piece
 
         if attacker is not None and defender is not None:
-            if attacker.rank == 9 and defender.rank == 0:
-                self.squares[defendery][defenderx].piece  = attacker
+            # Flag capture check
+            if defender.rank == 1:
+                self.squares[defendery][defenderx].piece = attacker
                 self.squares[attackery][attackerx].piece = None
 
             #Marshal against Spy
+            if attacker.rank == 9 and defender.rank == 0:
+                self.squares[defendery][defenderx].piece  = attacker
+                self.squares[attackery][attackerx].piece = None
+                
             elif attacker.rank == 11 and defender.rank == 2: 
                 self.squares[defendery][defenderx].piece = attacker
                 self.squares[attackery][attackerx].piece = None
             
             elif attacker.rank == 2 and defender.rank == 11:
                 self.squares[defendery][defenderx].piece = defender
-                self.squares[attackery][attackerx].piece = None
-
-            elif defender.rank == 1: 
-                self.squares[defendery][defenderx].piece = attacker
                 self.squares[attackery][attackerx].piece = None
 
             elif attacker.rank < defender.rank:
@@ -250,6 +250,8 @@ class Boardgame:
             else:
                 self.squares[defendery][defenderx].piece = None
                 self.squares[attackery][attackerx].piece = None
+
+        return None
     
     def select_piece(self, row, col, current_player):
         if self.squares[row][col].has_piece() and self.squares[row][col].piece.color == current_player:
@@ -264,8 +266,8 @@ class Boardgame:
         black_pieces_remaining = False
         red_pieces_remaining = False
 
-        for row in range(ROWS):
-            for col in range(COLS):
+        for row in range(0, 10):
+            for col in range(0, 10):
                 if self.squares[row][col].has_piece():
                     piece = self.squares[row][col].piece
                     if piece.rank == 1:  
@@ -288,6 +290,6 @@ class Boardgame:
         elif not red_pieces_remaining:
             return "Black wins! Red has no movable pieces left."
         else:
-            return None  # Game continues
+            return None 
 
 
