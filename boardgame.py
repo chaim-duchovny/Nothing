@@ -265,35 +265,39 @@ class Boardgame:
         return all(square.has_piece() for row in self.squares[:4] for square in row[:10]) and all(square.has_piece() for row in self.squares[6:] for square in row[:10])
     
     def check_win_condition(self):
-        black_flag_captured = False
-        red_flag_captured = False
+        black_flag_found = False
+        red_flag_found = False
         black_pieces_remaining = False
         red_pieces_remaining = False
 
-        for row in range(0, 10):
-            for col in range(0, 10):
+        for row in range(ROWS):
+            for col in range(COLS):
                 if self.squares[row][col].has_piece():
                     piece = self.squares[row][col].piece
-                    if piece.rank == 1:  
+                    if piece.rank == 1:  # Flag
                         if piece.color == "black":
-                            black_flag_captured = True
+                            black_flag_found = True
                         else:
-                            red_flag_captured = True
-                    elif piece.rank not in [0, 1]:  
+                            red_flag_found = True
+                    elif piece.rank not in [0, 1]:  # Not Bomb or Flag
                         if piece.color == "black":
                             black_pieces_remaining = True
                         else:
                             red_pieces_remaining = True
 
-        if black_flag_captured:
+        if not black_flag_found:
             return "Red wins by capturing the black flag!"
-        elif red_flag_captured:
+        elif not red_flag_found:
             return "Black wins by capturing the red flag!"
         elif not black_pieces_remaining:
             return "Red wins! Black has no movable pieces left."
         elif not red_pieces_remaining:
             return "Black wins! Red has no movable pieces left."
         else:
-            return None 
+            return None
+        
+   
+
+
 
 
