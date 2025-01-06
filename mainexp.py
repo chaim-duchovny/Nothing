@@ -70,9 +70,10 @@ class Main:
                 start_row, start_col = self.boardgame.selected_piece
                 move_result = self.boardgame.move_piece(start_col, start_row, col, row, self.current_player)
                 if move_result:
-                    if isinstance(move_result, tuple) and move_result[1]:
+                    win_condition = self.boardgame.check_win_condition()
+                    if win_condition:
                         self.game_over = True
-                        self.win_message = move_result[1]
+                        self.win_message = win_condition
                     else:
                         self.current_player = "black" if self.current_player == "red" else "red"
                     self.boardgame.selected_piece = None
@@ -82,7 +83,7 @@ class Main:
     def display_win_message(self, surface):
         font = pygame.font.Font(None, 36)
         text = font.render(self.win_message, True, (255, 0, 0))
-        text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        text_rect = text.get_rect(center = (WIDTH // 2, HEIGHT // 2))
         surface.blit(text, text_rect)
 
 main = Main()
