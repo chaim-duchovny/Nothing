@@ -296,8 +296,55 @@ class Boardgame:
         else:
             return None
         
-   
+    def select_piece(self, row, col, current_player):
+        if self.squares[row][col].has_piece() and self.squares[row][col].piece.color == current_player:
+            self.selected_piece = (row, col)
+            return True
+        return False
+    
+    def handle_placement(self, button, row, col):
+        if button == 1:
+            if (0 <= row <= 3) and (10 <= col <= 12):
+                self.handle_black_piece_selection(row, col)
+                return (row, col)
+            
+            if (0 <= row <= 3) and (0 <= col <= 9):
+                self.handle_black_piece_placement(row, col)
+                self.reset_piece_placement()
+                return None
+            
+            if (6 <= row <= 9) and (10 <= col <= 12):
+                self.handle_red_piece_selection(row, col)
+                return (row, col)
+            
+            if (6 <= row <= 9) and (0 <= col <= 9):
+                self.handle_red_piece_placement(row, col)
+                self.reset_piece_placement()
+                return None
+                
+        elif button == 3:
+            if (0 <= row <= 3) and (0 <= col <= 9):
+                self.return_piece_black_selction(row, col)
+                return (row, col)
+        
+            if (0 <= row <= 3) and (10 <= col <= 12):
+                original_position = self.get_original_position_black(self.piece_to_return_black)
+                if original_position == (row, col):
+                    self.return_piece_black_return(row, col)
+                    return None
+                
+            if (6 <= row <= 9) and (0 <= col <= 9):
+                self.return_piece_red_selction(row, col)
+                return (row, col)
+        
+            if (6 <= row <= 9) and (10 <= col <= 12):
+                original_position = self.get_original_position_red(self.piece_to_return_red)
+                if original_position == (row, col):
+                    self.return_piece_red_return(row, col)
+                    return None
 
-
+        if self.check_all_pieces_placed():
+            self.phase = "gameplay"
+            self.current_player = "red"
 
 
