@@ -1,3 +1,4 @@
+
 from square import Square
 from piece import *
 from const import *
@@ -77,18 +78,45 @@ class Boardgame:
                 available_squares.remove((row, col))
         
     def handle_black_piece_selection(self, row, col):
-        if not self.selected_black_piece and not self.piece_placed:
-            if (0 <= row <= 3) and (10 <= col <= 12):
-                if self.squares[row][col].has_piece():
-                    piece = self.squares[row][col].piece
-
-                    if piece.color == "black":
+        if (0 <= row <= 3) and (10 <= col <= 12):  # Ensure it's in the selection area
+            if self.squares[row][col].has_piece():
+                piece = self.squares[row][col].piece
+                if piece.color == "black":
+                    if self.selected_black_piece is None:  # If no piece is currently selected
                         if self.squares[row][col].number > 0:
                             self.squares[row][col].number -= 1
-                            self.selected_black_piece = piece
+                            self.selected_black_piece = piece  # Select the piece
+                            print(f"Selected Black Piece: {piece}")  # Debugging output
 
-                        if self.squares[row][col].number == 0:
-                            self.squares[row][col].piece = None
+                            if self.squares[row][col].number == 0:
+                                print("Hello")
+                                self.squares[row][col].piece = None
+                    
+                    elif self.selected_black_piece == piece:  # Deselect if already selected
+                        print("Deselecting Black Piece")
+                        self.selected_black_piece = None  # Reset selection
+                        self.squares[row][col].number += 1  # Restore the count
+                    
+                    else:  # If another piece is selected, switch selection
+                        print("Switching Black Piece Selection")
+                        previous_row, previous_col = None, None
+                        
+                        # Find the position of the previously selected black piece
+                        for r in range(ROWS):
+                            for c in range(COLS):
+                                if self.squares[r][c].piece == self.selected_black_piece:
+                                    previous_row, previous_col = r, c
+                        
+                        if previous_row is not None and previous_col is not None:
+                            # Restore count of previously selected piece's square
+                            self.squares[previous_row][previous_col].number += 1  
+                        
+                        self.selected_black_piece = piece
+                        self.squares[row][col].number -= 1  # Decrement count for new selection
+
+                    #if self.squares[row][col].number == 0:
+                        #print("Hello")
+                        #self.squares[row][col].piece = None
 
     def handle_black_piece_placement(self, row, col):
         if self.selected_black_piece:
@@ -347,4 +375,4 @@ class Boardgame:
             self.phase = "gameplay"
             self.current_player = "red"
 
-
+        return None
