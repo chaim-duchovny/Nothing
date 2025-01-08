@@ -14,6 +14,8 @@ class Boardgame:
         self.selected_black_piece = None
         self.selected_red_piece = None
         self.piece_placed = False
+        self.black_piece_selected = False
+        self.red_piece_selected = False
         self.piece_to_return_black = None
         self.piece_to_return_red = None
 
@@ -93,7 +95,7 @@ class Boardgame:
                 original_row, original_col = self.get_original_position_black(self.selected_black_piece)
                 if original_row is not None and original_col is not None:
                     self.squares[original_row][original_col].number += 1
-                    
+
                     if self.squares[original_row][original_col].piece is None:
                         self.squares[original_row][original_col].piece = self.selected_black_piece
                     self.selected_black_piece = None
@@ -146,9 +148,9 @@ class Boardgame:
     def get_original_position_red(self, piece):
         return self.original_positions_red.get(piece, None)
 
-    def return_piece_black_selction(self, row, col):
+    def return_piece_black_selection(self, row, col):
         if 0 <= row <= 3 and 0 <= col <= 9:
-            if self.squares[row][col].has_piece():
+            if self.squares[row][col].has_piece() and self.piece_to_return_black is None:
                 self.piece_to_return_black = self.squares[row][col].piece
                 self.squares[row][col].piece = None
         
@@ -159,11 +161,11 @@ class Boardgame:
                 self.squares[row][col].piece = self.piece_to_return_black
                 self.squares[row][col].number += 1
                 self.piece_placed = False
-                self.piece_to_return_black = None
+                self.piece_to_return_black = None  
 
-    def return_piece_red_selction(self, row, col):
+    def return_piece_red_selection(self, row, col):
         if 6 <= row <= 9 and 0 <= col <= 9:
-            if self.squares[row][col].has_piece():
+            if self.squares[row][col].has_piece() and self.piece_to_return_red is None:
                 self.piece_to_return_red = self.squares[row][col].piece
                 self.squares[row][col].piece = None
 
@@ -171,10 +173,10 @@ class Boardgame:
         if self.piece_to_return_red is not None and self.piece_to_return_red.color == "red":
             original_position = self.get_original_position_red(self.piece_to_return_red)
             if (row, col) == original_position:
-                self.squares[row][col].piece = self.piece_to_return_red 
+                self.squares[row][col].piece = self.piece_to_return_red
                 self.squares[row][col].number += 1
                 self.piece_placed = False
-                self.piece_to_return_red = None
+                self.piece_to_return_red = None  
     
     def valid_move(self, startx, starty, endx, endy, piece):
         startx, starty, endx, endy = map(int, (startx, starty, endx, endy))
@@ -340,7 +342,7 @@ class Boardgame:
                 
         elif button == 3:
             if (0 <= row <= 3) and (0 <= col <= 9):
-                self.return_piece_black_selction(row, col)
+                self.return_piece_black_selection(row, col)
                 return (row, col)
         
             if (0 <= row <= 3) and (10 <= col <= 12):
@@ -350,7 +352,7 @@ class Boardgame:
                     return None
                 
             if (6 <= row <= 9) and (0 <= col <= 9):
-                self.return_piece_red_selction(row, col)
+                self.return_piece_red_selection(row, col)
                 return (row, col)
         
             if (6 <= row <= 9) and (10 <= col <= 12):
