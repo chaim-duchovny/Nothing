@@ -38,6 +38,9 @@ class Main:
             if self.highlighted_square:
                 row, col = self.highlighted_square
                 game.highlight_selected_square_game_phase(screen, row, col) 
+            
+            if self.game.show_valid_moves_flag:
+                game.display_valid_moves(screen)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -47,6 +50,9 @@ class Main:
                     col = pos[0] // RECT_WIDTH
                     row = pos[1] // RECT_HEIGHT
                     if self.phase == "placement":
+                        if self.phase == "placement" and self.boardgame.check_all_pieces_placed():
+                            self.phase = "gameplay"
+                            self.current_player = "red"
                         result = self.boardgame.handle_placement(event.button, row, col)
                         if result:
                             self.highlighted_square = result  # Set highlighted square to selected piece
@@ -65,20 +71,23 @@ class Main:
 
     def handle_gameplay(self, button, row, col):
         if button == 1:
-            # If no piece is currently selected
             if self.boardgame.selected_piece is None:
                 if self.boardgame.select_piece(row, col, self.current_player):
+                    self.game.show_valid_moves_flag = True
+                    self.game.show_valid_moves(self.screen, row, col)
                     return (row, col)
             else:
                 start_row, start_col = self.boardgame.selected_piece
-                # Check if the player is selecting a new piece of their color
                 if self.boardgame.squares[row][col].has_piece() and self.boardgame.squares[row][col].piece.color == self.current_player:
                     self.boardgame.selected_piece = (row, col)
+                    self.game.show_valid_moves(self.screen, row, col)
                     return (row, col)
                 else:
-                    # Attempt to move the piece
                     move_result = self.boardgame.move_piece(start_col, start_row, col, row, self.current_player)
+
                     if move_result:
+                        print("Move successful; hiding valid moves.")
+                        self.game.show_valid_moves_flag = False
                         win_condition = self.boardgame.check_win_condition()
                         if win_condition:
                             self.game_over = True
@@ -86,7 +95,7 @@ class Main:
                         else:
                             self.current_player = "black" if self.current_player == "red" else "red"
                         self.boardgame.selected_piece = None
-                        return None  # No highlight after move
+                        return None
                     else:
                         return (start_row, start_col)
         
