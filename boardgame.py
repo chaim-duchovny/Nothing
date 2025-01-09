@@ -235,6 +235,7 @@ class Boardgame:
                 return True, win_result
         
             return True
+
         return False
 
     def combat(self, attacker, defender, attackerx, attackery, defenderx, defendery):
@@ -244,34 +245,120 @@ class Boardgame:
         defender = self.squares[defendery][defenderx].piece
 
         if attacker is not None and defender is not None:
-            # Flag capture check
+            
             if defender.rank == 1:
                 self.squares[defendery][defenderx].piece = attacker
                 self.squares[attackery][attackerx].piece = None
 
-            #Marshal against Spy
+            #Miner > Bomb
             if attacker.rank == 9 and defender.rank == 0:
-                self.squares[defendery][defenderx].piece  = attacker
-                self.squares[attackery][attackerx].piece = None
-                
-            elif attacker.rank == 11 and defender.rank == 2: 
-                self.squares[defendery][defenderx].piece = attacker
-                self.squares[attackery][attackerx].piece = None
+                if attacker.color == "red" and defender.color == "black":
+                    original_position = self.get_original_position_black(self.squares[defendery][defenderx].piece)
+                    defendery_original, defenderx_original = original_position
+                    self.squares[defendery_original][defenderx_original].piece = defender
+                    self.squares[defendery_original][defenderx_original].number += 1
+                    self.squares[defendery][defenderx].piece  = attacker
+                    self.squares[attackery][attackerx].piece = None
+                    
+                if attacker.color == "black" and defender.color == "red":
+                    original_position = self.get_original_position_red(self.squares[defendery][defenderx].piece)
+                    defendery_original, defenderx_original = original_position
+                    self.squares[defendery_original][defenderx_original].piece = defender
+                    self.squares[defendery_original][defenderx_original].number += 1
+                    self.squares[defendery][defenderx].piece  = attacker
+                    self.squares[attackery][attackerx].piece = None
+
+            #Spy > Marshal    
+            elif attacker.rank == 11 and defender.rank == 2:
+                if attacker.color == "red" and defender.color == "black":
+                    original_position = self.get_original_position_black(self.squares[defendery][defenderx].piece)
+                    defendery_original, defenderx_original = original_position
+                    self.squares[defendery_original][defenderx_original].piece = defender
+                    self.squares[defendery_original][defenderx_original].number += 1
+                    self.squares[defendery][defenderx].piece  = attacker
+                    self.squares[attackery][attackerx].piece = None
+                    
+                if attacker.color == "black" and defender.color == "red":
+                    original_position = self.get_original_position_red(self.squares[defendery][defenderx].piece)
+                    defendery_original, defenderx_original = original_position
+                    self.squares[defendery_original][defenderx_original].piece = defender
+                    self.squares[defendery_original][defenderx_original].number += 1
+                    self.squares[defendery][defenderx].piece  = attacker
+                    self.squares[attackery][attackerx].piece = None
             
+            #Marshal < Spy
             elif attacker.rank == 2 and defender.rank == 11:
-                self.squares[defendery][defenderx].piece = defender
-                self.squares[attackery][attackerx].piece = None
+                if attacker.color == "red" and defender.color == "black":
+                    original_position = self.get_original_position_black(self.squares[attackery][attackerx].piece)
+                    attackery_original, attackerx_original = original_position
+                    self.squares[attackery_original][attackerx_original].piece = attacker
+                    self.squares[defendery_original][defenderx_original].number += 1
+                    self.squares[attackery][attackerx].piece = None
+                    
+                if attacker.color == "black" and defender.color == "red":
+                    original_position = self.get_original_position_red(self.squares[defendery][defenderx].piece)
+                    attackery_original, attackerx_original = original_position
+                    self.squares[attackery_original][attackerx_original].piece = attacker
+                    self.squares[defendery_original][defenderx_original].number += 1
+                    self.squares[attackery][attackerx].piece = None
 
             elif attacker.rank < defender.rank:
-                self.squares[defendery][defenderx].piece = attacker
-                self.squares[attackery][attackerx].piece = None
+                if attacker.color == "red" and defender.color == "black":
+                    original_position = self.get_original_position_black(self.squares[defendery][defenderx].piece)
+                    defendery_original, defenderx_original = original_position
+                    self.squares[defendery_original][defenderx_original].piece = defender
+                    self.squares[defendery_original][defenderx_original].number += 1
+                    self.squares[defendery][defenderx].piece  = attacker
+                    self.squares[attackery][attackerx].piece = None
+                    
+                if attacker.color == "black" and defender.color == "red":
+                    original_position = self.get_original_position_red(self.squares[defendery][defenderx].piece)
+                    defendery_original, defenderx_original = original_position
+                    self.squares[defendery_original][defenderx_original].piece = defender
+                    self.squares[defendery_original][defenderx_original].number += 1
+                    self.squares[defendery][defenderx].piece  = attacker
+                    self.squares[attackery][attackerx].piece = None
 
             elif attacker.rank > defender.rank:
-                self.squares[attackery][attackerx].piece = None
+                if attacker.color == "red" and defender.color == "black":
+                    original_position = self.get_original_position_red(self.squares[attackery][attackerx].piece)
+                    attackery_original, attackerx_original = original_position
+                    self.squares[attackery_original][attackerx_original].piece = attacker
+                    self.squares[attackery_original][attackerx_original].number += 1
+                    self.squares[attackery][attackerx].piece = None
+                    
+                if attacker.color == "black" and defender.color == "red":
+                    original_position = self.get_original_position_black(self.squares[attackery][attackerx].piece)
+                    attackery_original, attackerx_original = original_position
+                    self.squares[attackery_original][attackerx_original].piece = attacker
+                    self.squares[attackery_original][attackerx_original].number += 1
+                    self.squares[attackery][attackerx].piece = None
 
+            #Attacker.rank = Defender.rank
             else:
-                self.squares[defendery][defenderx].piece = None
-                self.squares[attackery][attackerx].piece = None
+                if attacker.color == "red" and defender.color == "black":
+                    original_position1 = self.get_original_position_red(self.squares[attackery][attackerx].piece)
+                    attackery_original, attackerx_original = original_position1
+                    original_position2 = self.get_original_position_black(self.squares[defendery][defenderx].piece)
+                    defendery_original, defenderx_original = original_position2
+                    self.squares[attackery_original][attackerx_original].piece = attacker
+                    self.squares[attackery_original][attackerx_original].number += 1
+                    self.squares[defendery_original][defenderx_original].piece = defender
+                    self.squares[defendery_original][defenderx_original].number += 1
+                    self.squares[attackery][attackerx].piece = None
+                    self.squares[defendery][defenderx].piece = None
+                    
+                if attacker.color == "black" and defender.color == "red":
+                    original_position1 = self.get_original_position_black(self.squares[attackery][attackerx].piece)
+                    attackery_original, attackerx_original = original_position1
+                    original_position2 = self.get_original_position_red(self.squares[defendery][defenderx].piece)
+                    defendery_original, defenderx_original = original_position2
+                    self.squares[attackery_original][attackerx_original].piece = attacker
+                    self.squares[attackery_original][attackerx_original].number += 1
+                    self.squares[defendery_original][defenderx_original].piece = defender
+                    self.squares[defendery_original][defenderx_original].number += 1
+                    self.squares[attackery][attackerx].piece = None
+                    self.squares[defendery][defenderx].piece = None
 
         return None
     
@@ -360,9 +447,5 @@ class Boardgame:
                 if original_position == (row, col):
                     self.return_piece_red_return(row, col)
                     return None
-
-        if self.check_all_pieces_placed():
-            self.phase = "gameplay"
-            self.current_player = "red"
 
         return None
