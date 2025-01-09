@@ -1,3 +1,4 @@
+
 import pygame
 from boardgame import Boardgame
 from const import *
@@ -12,6 +13,9 @@ class Game:
         self.piece_placed = False
         self.piece_to_return_black = None
         self.piece_to_return_red = None
+        self.selected = False
+        self.valid_moves = []
+        self.show_valid_moves_flag = False
 
     def show_bg(self, surface):
         for row in range(ROWS):
@@ -93,6 +97,39 @@ class Game:
                 text = font.render(chr(col % 26 + ord('A')), True, (0, 0, 0)) 
                 text_rect = text.get_rect(topleft=(col * 90 + 75, 0 * 65 + 5))  
                 surface.blit(text, text_rect)
+    
+    def highlight_selected_square_placement_phase(self, surface, row, col):
+        rect = (col * RECT_WIDTH, row * RECT_HEIGHT, RECT_WIDTH, RECT_HEIGHT)
+        pygame.draw.rect(surface, "BLUE", rect, 3)
+
+    def highlight_selected_square_game_phase(self, surface, row, col):
+        rect = (col * RECT_WIDTH, row * RECT_HEIGHT, RECT_WIDTH, RECT_HEIGHT)
+        pygame.draw.rect(surface, "BLUE", rect, 3)
+
+    def show_valid_moves(self, surface, row, col):
+        if self.show_valid_moves_flag:
+            self.valid_moves = []
+            piece = self.boardgame.squares[row][col].piece
+            if piece:
+                for end_row in range(ROWS):
+                    for end_col in range(COLS):
+                        if self.boardgame.valid_move(col, row, end_col, end_row, piece):
+                            self.valid_moves.append((end_row, end_col))
+                            rect = (end_col * RECT_WIDTH, end_row * RECT_HEIGHT, RECT_WIDTH, RECT_HEIGHT)
+                            pygame.draw.rect(surface, (0, 255, 0, 128), rect, 3)
+        else:                    
+            return False
+    
+    def display_valid_moves(self, surface):
+        for row, col in self.valid_moves:
+            rect = (col * RECT_WIDTH, row * RECT_HEIGHT, RECT_WIDTH, RECT_HEIGHT)
+            pygame.draw.rect(surface, (0, 255, 0, 128), rect, 3)
+        
+
+    
+        
+    
+
 
 
 
