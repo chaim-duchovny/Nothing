@@ -18,6 +18,7 @@ class Boardgame:
         self.red_piece_selected = False
         self.piece_to_return_black = None
         self.piece_to_return_red = None
+        self.move_history = {}
 
     def create(self):
         for row in range(ROWS):
@@ -176,12 +177,30 @@ class Boardgame:
                 self.squares[row][col].piece = self.piece_to_return_red
                 self.squares[row][col].number += 1
                 self.piece_placed = False
-                self.piece_to_return_red = None  
+                self.piece_to_return_red = None 
+    
+    def update_move_history(self, piece, start, end):
+        if piece not in self.move_history:
+            self.move_history[piece] = []
+        self.move_history[piece].append((start, end))
+
+        if len(self.move_history[piece]) > 3:
+            self.move_history[piece].pop(0)
+
+        if len(self.move_history[piece]) == 3:
+            if self.move_history[piece][0][0] == self.move_history[piece][2][1] and \
+            self.move_history[piece][1][0] == self.move_history[piece][2][1] and \
+            self.move_history[piece][0][1] == self.move_history[piece][1][1] == self.move_history[piece][2][0]:
+                return False
+        return True
     
     def valid_move(self, startx, starty, endx, endy, piece):
         startx, starty, endx, endy = map(int, (startx, starty, endx, endy))
     
         if 10 <= endx <= 12:
+            return False
+        
+        if (endy, endx) in SPECIAL_POSITION:
             return False
         
         if piece.rank == 0 or piece.rank == 1:  # Flag or Bomb
@@ -195,14 +214,27 @@ class Boardgame:
             return False
         
         if piece.rank == 10:  # Scout
+            if startx != endx and starty != endy:
+                return False  # Prevent diagonal movement
+
             dx = 1 if endx > startx else -1 if endx < startx else 0
             dy = 1 if endy > starty else -1 if endy < starty else 0
+            
+            # Only allow movement in one direction at a time (horizontal or vertical)
+            if abs(dx) + abs(dy) != 1:
+                return False
+
             x, y = startx + dx, starty + dy
             while (x, y) != (endx, endy):
                 if self.squares[y][x].has_piece():
                     return False
                 x += dx
                 y += dy
+        
+        if piece in self.move_history:
+            if self.move_history[piece].count(((startx, starty), (endx, endy))) >= 2:
+                return False
+            
         return True
 
     def move_piece(self, startx, starty, endx, endy, current_player):
@@ -223,13 +255,17 @@ class Boardgame:
                 if end_square.piece.color != piece.color:
                     combat_result = self.combat(piece, end_square.piece, startx, starty, endx, endy)
                     if combat_result:
+                        self.update_move_history(piece, (startx, starty), (endx, endy))
+                        self.show_valid_moves_flag = False
                         return True, combat_result
                 else:
                     return False
             else:
                 end_square.piece = piece
                 start_square.piece = None
-            
+                self.update_move_history(piece, (startx, starty), (endx, endy))
+                self.show_valid_moves_flag = False
+
             win_result = self.check_win_condition()
             if win_result:
                 return True, win_result
