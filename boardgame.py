@@ -1,3 +1,4 @@
+
 from square import Square
 from piece import *
 from const import *
@@ -401,6 +402,8 @@ class Boardgame:
     def select_piece(self, row, col, current_player):
         if self.squares[row][col].has_piece() and self.squares[row][col].piece.color == current_player:
             self.selected_piece = (row, col)
+            return True
+        return False
 
     def check_all_pieces_placed(self):
         return all(square.has_piece() for row in self.squares[:4] for square in row[:10]) and all(square.has_piece() for row in self.squares[6:] for square in row[:10])
@@ -434,14 +437,24 @@ class Boardgame:
             return "Red wins! Black has no movable pieces left."
         elif not red_pieces_remaining:
             return "Black wins! Red has no movable pieces left."
+        elif not self.has_valid_moves("black"):
+            return "Red wins!"  # Red wins if Black cannot move
+        elif not self.has_valid_moves("red"):
+            return "Black wins!"  # Black wins if Red cannot move
         else:
             return None
-        
-    def select_piece(self, row, col, current_player):
-        if self.squares[row][col].has_piece() and self.squares[row][col].piece.color == current_player:
-            self.selected_piece = (row, col)
-            return True
-        return False
+    
+    def has_valid_moves(self, player_color):
+        for row in range(ROWS):
+            for col in range(COLS):
+                piece = self.squares[row][col].piece
+                if piece and piece.color == player_color:
+                    # Check all possible moves for this piece
+                    for end_row in range(ROWS):
+                        for end_col in range(COLS):
+                            if self.valid_move(col, row, end_col, end_row, piece):
+                                return True  # Found at least one valid move
+        return False  # No valid moves found
     
     def handle_placement(self, button, row, col):
         if button == 1:
