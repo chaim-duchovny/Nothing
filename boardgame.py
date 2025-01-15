@@ -1,4 +1,3 @@
-
 from square import Square
 from piece import *
 from const import *
@@ -187,13 +186,18 @@ class Boardgame:
 
         if len(self.move_history[piece]) > 3:
             self.move_history[piece].pop(0)
-
-        if len(self.move_history[piece]) == 3:
-            if self.move_history[piece][0][0] == self.move_history[piece][2][1] and \
-            self.move_history[piece][1][0] == self.move_history[piece][2][1] and \
-            self.move_history[piece][0][1] == self.move_history[piece][1][1] == self.move_history[piece][2][0]:
-                return False
+            
+        print(self.move_history[piece])
+        print(f"{piece}")
+        print(f"{piece.color}")
         return True
+        
+    #def is_repetitive_move(self, piece):
+        #if piece not in self.move_history or len(self.move_history[piece]) < 3:
+            #return False
+        #return self.move_history[piece][0][1] == self.move_history[piece][1][0] == self.move_history[piece][2][1] and \
+           #self.move_history[piece][0][0] == self.move_history[piece][2][0]
+            
     
     def valid_move(self, startx, starty, endx, endy, piece):
         startx, starty, endx, endy = map(int, (startx, starty, endx, endy))
@@ -232,10 +236,14 @@ class Boardgame:
                 x += dx
                 y += dy
         
-        if piece in self.move_history:
-            if self.move_history[piece].count(((startx, starty), (endx, endy))) >= 2:
-                return False
-            
+        if piece in self.move_history and len(self.move_history[piece]) == 3:
+            last_three_moves = self.move_history[piece]
+            if (last_three_moves[0][0] == last_three_moves[2][0] and
+                last_three_moves[0][1] == last_three_moves[2][1] and
+                last_three_moves[0][0] == last_three_moves[1][1]):
+                if (startx, starty) == last_three_moves[2][1] and (endx, endy) == last_three_moves[2][0]:
+                    return False
+
         return True
 
     def move_piece(self, startx, starty, endx, endy, current_player):
