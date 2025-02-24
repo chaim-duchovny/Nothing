@@ -1,8 +1,6 @@
-
 import pygame
 from boardgame import Boardgame
 from const import *
-
 
 class Game:
 
@@ -16,6 +14,7 @@ class Game:
         self.selected = False
         self.valid_moves = []
         self.show_valid_moves_flag = False
+        self.win_message = None
 
     def show_bg(self, surface):
         for row in range(ROWS):
@@ -30,7 +29,6 @@ class Game:
                     color = (119, 154, 88)
 
                 rect = (col * RECT_WIDTH, row * RECT_HEIGHT, RECT_WIDTH, RECT_HEIGHT)
-
                 pygame.draw.rect(surface, color, rect)
             
         for col in range(10, 13):
@@ -72,6 +70,15 @@ class Game:
                     text = font.render(str(self.boardgame.squares[row][col].number), True, (0, 0, 0)) 
                     text_rect = text.get_rect(topleft=(col * 90 + 5, row * 65 + 5))  
                     surface.blit(text, text_rect)
+
+    def render_name_of_black_pieces(self, surface):
+        for row in range(4):
+            for col in range(10, 13):
+                if self.boardgame.squares[row][col].name is not None:
+                    font = pygame.font.Font(None, 18)  
+                    text = font.render(str(self.boardgame.squares[row][col].name), True, (0, 0, 0)) 
+                    text_rect = text.get_rect(bottomright=((col + 1) * 90 - 5, (row + 1) * 65 - 5)) 
+                    surface.blit(text, text_rect)
     
     def render_number_of_red_pieces(self, surface):
         for row in range(6, 10):
@@ -80,6 +87,15 @@ class Game:
                     font = pygame.font.Font(None, 24)  
                     text = font.render(str(self.boardgame.squares[row][col].number), True, (255, 0, 0)) 
                     text_rect = text.get_rect(topleft=(col * 90 + 5, row * 65 + 5))  
+                    surface.blit(text, text_rect)
+
+    def render_name_of_red_pieces(self, surface):
+        for row in range(6, 10):
+            for col in range(10, 13):
+                if self.boardgame.squares[row][col].name is not None:
+                    font = pygame.font.Font(None, 18)  
+                    text = font.render(str(self.boardgame.squares[row][col].name), True, (255, 0, 0)) 
+                    text_rect = text.get_rect(bottomright=((col + 1) * 90 - 5, (row + 1) * 65 - 5))  
                     surface.blit(text, text_rect)
 
     def render_number_of_row(self, surface):
@@ -99,6 +115,10 @@ class Game:
                 surface.blit(text, text_rect)
     
     def highlight_selected_square_placement_phase(self, surface, row, col):
+        rect = (col * RECT_WIDTH, row * RECT_HEIGHT, RECT_WIDTH, RECT_HEIGHT)
+        pygame.draw.rect(surface, "BLUE", rect, 3)
+
+    def highlight_selected_square_return_phase(self, surface, row, col):
         rect = (col * RECT_WIDTH, row * RECT_HEIGHT, RECT_WIDTH, RECT_HEIGHT)
         pygame.draw.rect(surface, "BLUE", rect, 3)
 
@@ -125,6 +145,12 @@ class Game:
             rect = (col * RECT_WIDTH, row * RECT_HEIGHT, RECT_WIDTH, RECT_HEIGHT)
             pygame.draw.rect(surface, (0, 255, 0, 128), rect, 3)
         
+    def display_win_message(self, surface):
+        if self.win_message:
+            font = pygame.font.Font(None, 74)
+            text = font.render(self.win_message, True, (255, 0, 0))
+            text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            surface.blit(text, text_rect)
 
     
         
