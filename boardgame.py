@@ -18,7 +18,9 @@ class Boardgame:
         self.red_piece_selected = False
         self.piece_to_return_black = None
         self.piece_to_return_red = None
+        self.all_pieces_placed = False
         self.move_history = {}
+        self.flag = True
 
     def create(self):
         for row in range(ROWS):
@@ -27,55 +29,55 @@ class Boardgame:
     
     def add_pieces_black(self, color):
         pieces = [
-            (6, Bomb), 
-            (1, Marshal), 
-            (1, General),
-            (2, Colonel), 
-            (3, Major), 
-            (4, Captain),
-            (4, Lieutenant), 
-            (4, Sergeant), 
-            (5, Miner),
-            (8, Scout), 
-            (1, Spy), 
-            (1, Flag)
+            (6, "Bom.", Bomb), 
+            (1, "Mar.", Marshal), 
+            (1, "Gen.", General),
+            (2, "Col.", Colonel), 
+            (3, "Maj.", Major), 
+            (4, "Cap.", Captain),
+            (4, "Lie.", Lieutenant), 
+            (4, "Ser.", Sergeant), 
+            (5, "Min.", Miner),
+            (8, "Sct.", Scout), 
+            (1, "Spy", Spy), 
+            (1, "Flag", Flag)
         ]
     
         available_squares = [(row, col) for row in range(4) for col in range(10, 13)]
         self.original_positions_black = {}
     
-        for count, piece_class in pieces:
+        for count, name, piece_class in pieces:
             if available_squares:
                 row, col = random.choice(available_squares)
                 piece_instance = piece_class(color)
-                self.squares[row][col] = Square(row, col, count, piece_instance)
+                self.squares[row][col] = Square(row, col, count, name, piece_instance)
                 self.original_positions_black[piece_instance] = (row, col)
                 available_squares.remove((row, col))
 
     def add_pieces_red(self, color):
         pieces = [
-            (6, Bomb), 
-            (1, Marshal), 
-            (1, General),
-            (2, Colonel), 
-            (3, Major), 
-            (4, Captain),
-            (4, Lieutenant), 
-            (4, Sergeant), 
-            (5, Miner),
-            (8, Scout), 
-            (1, Spy), 
-            (1, Flag)
+            (6, "Bom.", Bomb), 
+            (1, "Mar.", Marshal), 
+            (1, "Gen.", General),
+            (2, "Col.", Colonel), 
+            (3, "Maj.", Major), 
+            (4, "Cap.", Captain),
+            (4, "Lie.", Lieutenant), 
+            (4, "Ser.", Sergeant), 
+            (5, "Min.", Miner),
+            (8, "Sct.", Scout), 
+            (1, "Spy", Spy), 
+            (1, "Flag", Flag)
         ]
     
         available_squares = [(row, col) for row in range(6, 10) for col in range(10, 13)]
         self.original_positions_red = {}
     
-        for count, piece_class in pieces:
+        for count, name, piece_class in pieces:
             if available_squares:
                 row, col = random.choice(available_squares)
                 piece_instance = piece_class(color)
-                self.squares[row][col] = Square(row, col, count, piece_instance)
+                self.squares[row][col] = Square(row, col, count, name, piece_instance)
                 self.original_positions_red[piece_instance] = (row, col)
                 available_squares.remove((row, col))
         
@@ -186,19 +188,9 @@ class Boardgame:
 
         if len(self.move_history[piece]) > 3:
             self.move_history[piece].pop(0)
-            
-        print(self.move_history[piece])
-        print(f"{piece}")
-        print(f"{piece.color}")
-        return True
         
-    #def is_repetitive_move(self, piece):
-        #if piece not in self.move_history or len(self.move_history[piece]) < 3:
-            #return False
-        #return self.move_history[piece][0][1] == self.move_history[piece][1][0] == self.move_history[piece][2][1] and \
-           #self.move_history[piece][0][0] == self.move_history[piece][2][0]
+        return True
             
-    
     def valid_move(self, startx, starty, endx, endy, piece):
         startx, starty, endx, endy = map(int, (startx, starty, endx, endy))
     
@@ -230,9 +222,15 @@ class Boardgame:
                 return False
 
             x, y = startx + dx, starty + dy
+
             while (x, y) != (endx, endy):
+
+                if (y, x) in SPECIAL_POSITION:
+                    return False
+
                 if self.squares[y][x].has_piece():
                     return False
+                
                 x += dx
                 y += dy
         
@@ -337,14 +335,14 @@ class Boardgame:
                     original_position = self.get_original_position_black(self.squares[attackery][attackerx].piece)
                     attackery_original, attackerx_original = original_position
                     self.squares[attackery_original][attackerx_original].piece = attacker
-                    self.squares[defendery_original][defenderx_original].number += 1
+                    self.squares[attackery_original][attackerx_original].number += 1
                     self.squares[attackery][attackerx].piece = None
                     
                 if attacker.color == "black" and defender.color == "red":
                     original_position = self.get_original_position_red(self.squares[defendery][defenderx].piece)
                     attackery_original, attackerx_original = original_position
                     self.squares[attackery_original][attackerx_original].piece = attacker
-                    self.squares[defendery_original][defenderx_original].number += 1
+                    self.squares[attackery_original][attackerx_original].number += 1
                     self.squares[attackery][attackerx].piece = None
 
             elif attacker.rank < defender.rank:
@@ -364,7 +362,7 @@ class Boardgame:
                     self.squares[defendery][defenderx].piece  = attacker
                     self.squares[attackery][attackerx].piece = None
 
-            elif attacker.rank > defender.rank:
+            elif attacker.rank > defender.rank and defender.rank != 1:
                 if attacker.color == "red" and defender.color == "black":
                     original_position = self.get_original_position_red(self.squares[attackery][attackerx].piece)
                     attackery_original, attackerx_original = original_position
@@ -381,7 +379,7 @@ class Boardgame:
 
             #Attacker.rank = Defender.rank
             else:
-                if attacker.color == "red" and defender.color == "black":
+                if attacker.color == "red" and defender.color == "black" and defender.rank != 1:
                     original_position1 = self.get_original_position_red(self.squares[attackery][attackerx].piece)
                     attackery_original, attackerx_original = original_position1
                     original_position2 = self.get_original_position_black(self.squares[defendery][defenderx].piece)
@@ -393,7 +391,7 @@ class Boardgame:
                     self.squares[attackery][attackerx].piece = None
                     self.squares[defendery][defenderx].piece = None
                     
-                if attacker.color == "black" and defender.color == "red":
+                if attacker.color == "black" and defender.color == "red" and defender.rank != 1:
                     original_position1 = self.get_original_position_black(self.squares[attackery][attackerx].piece)
                     attackery_original, attackerx_original = original_position1
                     original_position2 = self.get_original_position_red(self.squares[defendery][defenderx].piece)
@@ -414,7 +412,12 @@ class Boardgame:
         return False
 
     def check_all_pieces_placed(self):
-        return all(square.has_piece() for row in self.squares[:4] for square in row[:10]) and all(square.has_piece() for row in self.squares[6:] for square in row[:10])
+        for row in range(ROWS):
+            for col in range(COLS):
+                if ((0 <= row <= 3) or (6 <= row <= 9)) and (0 <= col <= 9):
+                    if not self.squares[row][col].has_piece():
+                        return False
+        return True
     
     def check_win_condition(self):
         black_flag_found = False
@@ -431,7 +434,7 @@ class Boardgame:
                             black_flag_found = True
                         else:
                             red_flag_found = True
-                    elif piece.rank not in [0, 1]:  # Not Bomb or Flag
+                    elif piece.rank not in [0, 1]:  
                         if piece.color == "black":
                             black_pieces_remaining = True
                         else:
@@ -445,10 +448,12 @@ class Boardgame:
             return "Red wins! Black has no movable pieces left."
         elif not red_pieces_remaining:
             return "Black wins! Red has no movable pieces left."
+        elif not self.has_valid_moves("red") and not self.has_valid_moves("black"):
+            return "Draw!"
         elif not self.has_valid_moves("black"):
-            return "Red wins!"  # Red wins if Black cannot move
+            return "Red wins!"  
         elif not self.has_valid_moves("red"):
-            return "Black wins!"  # Black wins if Red cannot move
+            return "Black wins!"   
         else:
             return None
     
@@ -465,6 +470,9 @@ class Boardgame:
         return False  # No valid moves found
     
     def handle_placement(self, button, row, col):
+        if self.check_all_pieces_placed():
+            return None
+        
         if button == 1:
             if (0 <= row <= 3) and (10 <= col <= 12):
                 self.handle_black_piece_selection(row, col)
@@ -484,7 +492,7 @@ class Boardgame:
                 self.reset_piece_placement()
                 return None
                 
-        elif button == 3:
+        elif button == 3 and self.flag:
             if (0 <= row <= 3) and (0 <= col <= 9):
                 self.return_piece_black_selection(row, col)
                 return (row, col)
@@ -504,5 +512,6 @@ class Boardgame:
                 if original_position == (row, col):
                     self.return_piece_red_return(row, col)
                     return None
-
-        return None
+                
+        self.reset_piece_placement()
+        return (row, col)
